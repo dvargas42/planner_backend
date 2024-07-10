@@ -1,4 +1,4 @@
-package com.dvargas42.planner_backend.trip;
+package com.dvargas42.planner_backend.module.trip;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
