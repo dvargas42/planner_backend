@@ -57,8 +57,7 @@ public class ActivityController {
         }),
         @ApiResponse(responseCode = "400", description = "Trip not found")
     })
-    public ResponseEntity<List<ActivityGetAllRespDTO>> getAllActivities(
-            @RequestParam @NotNull UUID tripId) {
+    public ResponseEntity<List<ActivityGetAllRespDTO>> getAllActivities(@RequestParam @NotNull UUID tripId) {
 
         List<ActivityGetAllRespDTO> activityList = this.activityService
                 .getAllActivitiesFromEvent(tripId);
