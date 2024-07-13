@@ -1,0 +1,35 @@
+name: Planner Backend Application
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+            - name: Setup Java
+              uses: actions/setup-java@v3
+              with:
+                distribution: temurin
+                java-version: 21
+            - name: Build project
+              run: mvn clean install
+            - name: Login docker
+              run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+            - name: Build docker image
+              run: docker build -t dvargas42/planner-backend .
+            - name: Publish image
+              run: docker push dvargas42/planner-backend
+    deploy:
+        needs: build
+        runs-on: self-hosted
+        steps:
+            - name: Pull image Docker Hub
+              run: docker pull dvargas42/planner-backend:latest
+            - name: Remove container
+              run: docker rm -f planner-backend
+            - name: Run Docker container
+              run: docker run -d -p 8080:8080 -e DATABASE_URL=${{secrets.DATABASE_URL}} -e DATABASE_PASSWORD='${{secrets.DATABASE_PASSWORD}}' -e DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}} --name planner-backend dvargas42/planner-backend
