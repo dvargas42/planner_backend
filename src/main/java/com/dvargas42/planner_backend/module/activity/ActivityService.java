@@ -1,12 +1,16 @@
 package com.dvargas42.planner_backend.module.activity;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dvargas42.planner_backend.module.activity.dto.ActivityGetAllRespDTO;
+import com.dvargas42.planner_backend.module.activity.dto.ActivityCreateReqDTO;
+import com.dvargas42.planner_backend.module.activity.dto.ActivityCreateRespDTO;
 import com.dvargas42.planner_backend.module.trip.Trip;
-
-import java.util.List;
-import java.util.UUID;
+import com.dvargas42.planner_backend.module.trip.TripService;
 
 @Service
 public class ActivityService {
@@ -14,15 +18,22 @@ public class ActivityService {
     @Autowired
     private ActivityRepository activityRepository;
 
-    public ActivityResponse saveActivity(ActivityRequestPayload payload, Trip trip) {
-        Activity newActivity = new Activity(payload.title(), payload.occurs_at(), trip);
-        this.activityRepository.save(newActivity);
-        return new ActivityResponse(newActivity.getId());
+    @Autowired
+    private TripService tripService;
+
+    public ActivityCreateRespDTO createActivity(ActivityCreateReqDTO payload) {
+
+        Trip trip = this.tripService.findTrip(payload.trip_id());
+        Activity activity = new Activity(payload.title(), payload.occurs_at(), trip);
+
+        this.activityRepository.save(activity);
+
+        return new ActivityCreateRespDTO(activity.getId());
     }
 
-    public List<ActivityData> getAllActivitiesFromEvent(UUID tripId) {
-        return this.activityRepository.findByTripId(tripId).stream().map(
-                activity -> new ActivityData(activity.getId(), activity.getTitle(), activity.getOccursAt())
-        ).toList();
+    public List<ActivityGetAllRespDTO> getAllActivitiesFromEvent(UUID tripId) {
+        
+        return this.activityRepository.findByTripId(tripId).stream()
+                .map(ActivityGetAllRespDTO::new).toList();
     }
 }
