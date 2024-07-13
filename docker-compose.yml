@@ -1,0 +1,73 @@
+  version: '3.8'
+
+  networks:
+    vm-network:
+      driver: bridge
+
+  volumes:
+    postgres_data:  
+    prometheus_data:
+    grafana_data:
+    sonarqube_data:
+    sonarqube_extensions:
+    sonarqube_logs:
+    sonarqube_temp:
+
+  services:
+    postgres:
+      container_name: planner_db
+      image: postgres:latest
+      restart: always
+      ports:
+        - 5432:5432
+      environment:
+        - POSTGRES_USER=admin
+        - POSTGRES_PASSWORD=admin
+        - POSTGRES_DB=planner
+      volumes:
+        - ./docker/data/postgres_data:/var/lib/postgresql/data
+      networks:
+        - vm-network
+      
+    prometheus:
+      container_name: prometheus
+      image: prom/prometheus:latest
+      volumes:
+        - ./docker/config/prometheus.yml:/etc/prometheus/prometheus.yml
+        - ./docker/data/prometheus_data:/prometheus
+      extra_hosts:
+        - "host.docker.internal:172.17.0.1"
+      ports:
+        - 9090:9090
+      networks:
+        - vm-network
+
+    grafana:
+      container_name: grafana
+      image: grafana/grafana:latest
+      volumes:
+        - ./docker/data/grafana_data:/var/lib/grafana
+      ports:
+        - 3000:3000
+      networks:
+        - vm-network
+
+    sonarqube:
+      container_name: sonarqube
+      image: sonarqube:latest
+      restart: always
+      ports:
+        - 9000:9000
+      depends_on:
+        - postgres
+      environment:
+        SONARQUBE_JDBC_USERNAME: myuser
+        SONARQUBE_JDBC_PASSWORD: mypassword
+        SONARQUBE_JDBC_URL: jdbc:postgresql://db:5432/mydatabase
+      volumes:
+        - ./docker/data/sonarqube_data:/opt/sonarqube/data
+        - ./docker/data/sonarqube_extensions:/opt/sonarqube/extensions
+        - ./docker/data/sonarqube_logs:/opt/sonarqube/logs
+        - ./docker/data/sonarqube_temp:/opt/sonarqube/temp
+      networks:
+        - vm-network
