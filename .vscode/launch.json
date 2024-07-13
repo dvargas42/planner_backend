@@ -2,11 +2,11 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Spring Boot-PlannerBackendApplication<planner_backend>",
+            "name": "Spring Boot-PlannerBackendApplication<planner>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.dvargas42.planner_backend.PlannerBackendApplication",
-            "projectName": "planner_backend",
+            "projectName": "planner",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
