@@ -1,135 +1,84 @@
 package com.dvargas42.planner_backend.module.trip;
 
-import com.dvargas42.planner_backend.module.activity.ActivityData;
-import com.dvargas42.planner_backend.module.activity.ActivityRequestPayload;
-import com.dvargas42.planner_backend.module.activity.ActivityResponse;
-import com.dvargas42.planner_backend.module.activity.ActivityService;
-import com.dvargas42.planner_backend.module.link.LinkData;
-import com.dvargas42.planner_backend.module.link.LinkRequestPayload;
-import com.dvargas42.planner_backend.module.link.LinkResponse;
-import com.dvargas42.planner_backend.module.link.LinkService;
-import com.dvargas42.planner_backend.module.participant.*;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.dvargas42.planner_backend.module.trip.dto.TripCreateReqDTO;
+import com.dvargas42.planner_backend.module.trip.dto.TripCreateRespDTO;
+import com.dvargas42.planner_backend.module.trip.dto.TripGetDetailsRespDTO;
+import com.dvargas42.planner_backend.module.trip.dto.TripUpdateReqDTO;
+import com.dvargas42.planner_backend.module.trip.dto.TripUpdateRespDTO;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/trips")
+@Tag(name = "Trip", description = "Trip information")
 public class TripController {
 
     @Autowired
-    private ParticipantService participantService;
-
-    @Autowired
-    private ActivityService activityService;
-
-    @Autowired
-    private LinkService linkService;
-
-    @Autowired
-    private TripRepository tripRepository;
+    private TripService tripService;
 
     @PostMapping("/")
-    public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripRequestPayload payload) {
-        Trip newTrip = new Trip(payload);
+    @Operation(summary = "Trip register", description = "This functionality is responsible for registering a trip")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", content = {
+            @Content(schema = @Schema(implementation = TripCreateRespDTO.class))
+        }),
+        @ApiResponse(responseCode = "400", description = "Trip already exists")
+    })
+    public ResponseEntity<TripCreateRespDTO> createTrip(
+            @RequestBody @Valid TripCreateReqDTO payload) {
+        TripCreateRespDTO trip = this.tripService.createTrip(payload);
 
-        this.tripRepository.save(newTrip);
-
-        this.participantService.registerParticipantsToEvent(payload.emails_to_invite(), newTrip);
-        return ResponseEntity.ok(new TripCreateResponse(newTrip.getId()));
+        return ResponseEntity.ok(trip);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Trip> getTripDetails(@PathVariable UUID id) {
-        Optional<Trip> trip = this.tripRepository.findById(id);
+    @Operation(summary = "Trip get details", description = "This functionality is responsible for get details a trip")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", content = {
+            @Content(schema = @Schema(implementation = TripGetDetailsRespDTO.class))
+        }),
+        @ApiResponse(responseCode = "400", description = "Trip is not found")
+    })
+    public ResponseEntity<TripGetDetailsRespDTO> getTripDetails(
+            @PathVariable @NotNull UUID id) {
+        TripGetDetailsRespDTO trip = this.tripService.getTripDetails(id);
 
-        return trip.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(trip);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Trip> updateTrip(@PathVariable UUID id, @RequestBody TripRequestPayload payload) {
-        Optional<Trip> trip = this.tripRepository.findById(id);
+    
 
-        if (trip.isPresent()) {
-            Trip rawTrip = trip.get();
-            rawTrip.setEndsAt(LocalDateTime.parse(payload.ends_at(), DateTimeFormatter.ISO_DATE_TIME));
-            rawTrip.setStartsAt(LocalDateTime.parse(payload.starts_at(), DateTimeFormatter.ISO_DATE_TIME));
-            rawTrip.setDestination(payload.destination());
+    @PatchMapping("/{id}")
+    @Operation(summary = "Trip update", description = "This functionality is responsible for update a trip")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", content = {
+            @Content(schema = @Schema(implementation = TripUpdateRespDTO.class))
+        }),
+        @ApiResponse(responseCode = "400", description = "Trip not found")
+    })
+    public ResponseEntity<TripUpdateRespDTO> updateTrip(
+            @PathVariable @NotNull UUID id, @RequestBody @Valid TripUpdateReqDTO payload) {
+        TripUpdateRespDTO trip = this.tripService.updateTrip(id, payload);
 
-            return ResponseEntity.ok(this.tripRepository.save(rawTrip));
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(trip);
     }
-
-    @PatchMapping("/{id}/confirm")
-    public ResponseEntity<Trip> confirmTrip(@PathVariable UUID id) {
-        Optional<Trip> trip = this.tripRepository.findById(id);
-
-        if (trip.isPresent()) {
-            Trip rawTrip = trip.get();
-            rawTrip.setIsConfirmed(true);
-
-            this.tripRepository.save(rawTrip);
-            this.participantService.triggerConfirmationEmailToParticipants(id);
-
-            return ResponseEntity.ok(rawTrip);
-        }
-
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping("/{id}/invite")
-        public ResponseEntity<ParticipantCreateResponse> inviteParticipant(@PathVariable UUID id, @RequestBody ParticipantRequestPayload payload) {
-        Optional<Trip> trip = this.tripRepository.findById(id);
-
-        if (trip.isPresent()) {
-            Trip rawTrip = trip.get();
-
-            ParticipantCreateResponse participantResponse = this.participantService.registerParticipantToEvent(payload.email(), rawTrip);
-
-            if (rawTrip.getIsConfirmed()) {
-                this.participantService.triggerConfirmationEmailToParticipant(payload.email());
-            }
-            return ResponseEntity.ok(participantResponse);
-        }
-        return ResponseEntity.notFound().build();
-    }
-                
-    @GetMapping("/{id}/participants")
-    public ResponseEntity<List<ParticipantData>> getAllParticipants(@PathVariable UUID id) {
-        List<ParticipantData> participantList = this.participantService.getAllParticipantsFromEvent(id);
-
-        return ResponseEntity.ok(participantList);
-    }
-
-    @PostMapping("/{id}/activities")
-    public ResponseEntity<ActivityResponse> createActivity(@PathVariable UUID id, @RequestBody ActivityRequestPayload payload) {
-        Optional<Trip> trip =tripRepository.findById(id);
-
-        if (trip.isPresent()) {
-            Trip rawTrip = trip.get();
-            ActivityResponse activityResponse = this.activityService.saveActivity(payload, rawTrip);
-
-            return ResponseEntity.ok(activityResponse);
-
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/{id}/activities")
-    public ResponseEntity<List<ActivityData>> getAllActivities(@PathVariable UUID id) {
-        List<ActivityData> activityList = this.activityService.getAllActivitiesFromEvent(id);
-
-        return ResponseEntity.ok(activityList);
-    }
-
-   
 }
