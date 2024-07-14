@@ -48,7 +48,7 @@ public class ActivityController {
 
         return ResponseEntity.ok(activity);
     }
-
+    
     @GetMapping("/")
     @Operation(summary = "Activity search all", description = "This functionality is responsible for get all activities of a trip")
     @ApiResponses({
