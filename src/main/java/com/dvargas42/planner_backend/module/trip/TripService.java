@@ -30,29 +30,14 @@ public class TripService {
     private ParticipantRepository participantRepository;
 
     public TripCreateRespDTO createTrip(TripCreateReqDTO payload) {
-        Trip newTrip = new Trip(payload);
+        Trip trip = new Trip(payload);
         
-        if (!newTrip.isStartsAtAfterNow()) {
-            throw new TripStartsAtInPastException(
-                "starts_at", newTrip.getStartsAt().toString());
-        }
+        dateValidation(trip);
 
-        if (newTrip.isStartsAtEqualsEndsAt()) {
-            throw new TripStartsAtEqualEndsAtException(
-                "starts_at", newTrip.getStartsAt().toString(), 
-                "ends_at", newTrip.getEndsAt().toString());
-        }
-
-        if (!newTrip.isEndsAtMoreThanStartsAt()) {
-            throw new TripEndsAtIsNotMoreThanStartsAtException(
-                "starts_at", newTrip.getStartsAt().toString(), 
-                "ends_at", newTrip.getEndsAt().toString());
-        }
-
-        this.tripRepository.save(newTrip);
-        this.createParticipantsToEvent(payload.emails_to_invite(), newTrip);
+        this.tripRepository.save(trip);
+        this.createParticipantsToEvent(payload.emails_to_invite(), trip);
         
-        return new TripCreateRespDTO(newTrip.getId());
+        return new TripCreateRespDTO(trip.getId());
     }
 
     public TripGetDetailsRespDTO getTripDetails(UUID id) {
@@ -66,6 +51,8 @@ public class TripService {
         trip.setEndsAt(LocalDateTime.parse(payload.ends_at(), DateTimeFormatter.ISO_DATE_TIME));
         trip.setStartsAt(LocalDateTime.parse(payload.starts_at(), DateTimeFormatter.ISO_DATE_TIME));
         trip.setDestination(payload.destination());
+
+        dateValidation(trip);
 
         this.tripRepository.save(trip);
 
@@ -85,5 +72,24 @@ public class TripService {
                 .map(email -> new Participant(email, trip)).toList();
 
         this.participantRepository.saveAll(participants);
+    }
+
+    private void dateValidation(Trip trip) {
+        if (!trip.isStartsAtAfterNow()) {
+            throw new TripStartsAtInPastException(
+                "starts_at", trip.getStartsAt().toString());
+        }
+
+        if (trip.isStartsAtEqualsEndsAt()) {
+            throw new TripStartsAtEqualEndsAtException(
+                "starts_at", trip.getStartsAt().toString(), 
+                "ends_at", trip.getEndsAt().toString());
+        }
+
+        if (!trip.isEndsAtMoreThanStartsAt()) {
+            throw new TripEndsAtIsNotMoreThanStartsAtException(
+                "starts_at", trip.getStartsAt().toString(), 
+                "ends_at", trip.getEndsAt().toString());
+        }
     }
 }
