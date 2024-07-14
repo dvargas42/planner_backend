@@ -65,8 +65,6 @@ public class TripController {
         return ResponseEntity.ok(trip);
     }
 
-    
-
     @PatchMapping("/{id}")
     @Operation(summary = "Trip update", description = "This functionality is responsible for update a trip")
     @ApiResponses({
