@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class TripControllerGetTripDetailsTest {
+class TripControllerGetTripDetailsTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -32,7 +32,7 @@ public class TripControllerGetTripDetailsTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void shouldToBeAbleToGetAllTripDetails() throws Exception {
+    void shouldToBeAbleToGetAllTripDetails() throws Exception {
         String DESTINATION = "LOCALTEST, TS";
         String OWNER_EMAIL = "owner@gmail.com.br";
         String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
@@ -82,7 +82,7 @@ public class TripControllerGetTripDetailsTest {
     }
 
     @Test
-    public void shouldToBeNotAbleGetAllTripDetailsWhenIdIsIncorrect() throws Exception {
+    void shouldToBeNotAbleGetAllTripDetailsWhenIdIsIncorrect() throws Exception {
         String DESTINATION = "LOCALTEST, TS";
         String OWNER_EMAIL = "owner@gmail.com.br";
         String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
