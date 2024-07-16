@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class ParticipantControllerConfirm {
+class ParticipantControllerConfirm {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -38,7 +38,7 @@ public class ParticipantControllerConfirm {
     private ObjectMapper objectMapper;
 
     @Test
-    public void shouldToBeAbleToConfirmParticipant() throws Exception {
+    void shouldToBeAbleToConfirmParticipant() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
@@ -107,7 +107,7 @@ public class ParticipantControllerConfirm {
     }
 
     @Test
-    public void shouldToBeNotAbleToConfirmParticipantWhenIdIsInvalid() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenIdIsInvalid() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -132,7 +132,7 @@ public class ParticipantControllerConfirm {
     }
 
     @Test
-    public void shouldToBeNotAbleToConfirmParticipantWhenNameIsOne() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenNameIsOne() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
@@ -192,7 +192,7 @@ public class ParticipantControllerConfirm {
     }
 
     @Test
-    public void shouldToBeNotAbleToConfirmParticipantWhenNameIsInvalid() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenNameIsInvalid() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
@@ -252,7 +252,7 @@ public class ParticipantControllerConfirm {
     }
 
     @Test
-    public void shouldToBeNotAbleToConfirmParticipantWhenEmailIsInvalid() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenEmailIsInvalid() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
@@ -312,7 +312,7 @@ public class ParticipantControllerConfirm {
     }
 
     @Test
-    public void shouldToBeNotAbleToConfirmParticipantWhenNameIsBlank() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenNameIsBlank() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
@@ -372,7 +372,7 @@ public class ParticipantControllerConfirm {
     }
 
     @Test
-    public void shouldToBeNotAbleToConfirmParticipantWhenEmailIsBlank() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenEmailIsBlank() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
