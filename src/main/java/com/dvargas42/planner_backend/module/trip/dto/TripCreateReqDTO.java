@@ -26,6 +26,7 @@ public record TripCreateReqDTO(
         @NotNull                        
         List<String> emails_to_invite,
 
+        @NotBlank
         @Email(message = "must have an valid e-mail")
         @Length(max = 255, message = "must not have more than 255 characters")
         String owner_email,
