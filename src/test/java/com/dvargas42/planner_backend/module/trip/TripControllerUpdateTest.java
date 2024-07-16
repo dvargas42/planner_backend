@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class TripControllerUpdateTest {
+class TripControllerUpdateTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -37,7 +37,7 @@ public class TripControllerUpdateTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void shouldToBeAbleToUpdate() throws Exception {
+    void shouldToBeAbleToUpdate() throws Exception {
         String DESTINATION = "LOCALTEST, TS";
         String OWNER_EMAIL = "owner@gmail.com.br";
         String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
@@ -104,7 +104,7 @@ public class TripControllerUpdateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToUpdatWhenStartsAtInPast() throws Exception {
+    void shouldToBeNotAbleToUpdatWhenStartsAtInPast() throws Exception {
         String DESTINATION = "LOCALTEST, TS";
         String OWNER_EMAIL = "owner@gmail.com.br";
         String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
@@ -161,7 +161,7 @@ public class TripControllerUpdateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToUpdatWhenEndsAtLessThanStartsAt() throws Exception {
+    void shouldToBeNotAbleToUpdatWhenEndsAtLessThanStartsAt() throws Exception {
         String DESTINATION = "LOCALTEST, TS";
         String OWNER_EMAIL = "owner@gmail.com.br";
         String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
@@ -218,7 +218,7 @@ public class TripControllerUpdateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToUpdatWhenStartsAtIsEqualEndsAt() throws Exception {
+    void shouldToBeNotAbleToUpdatWhenStartsAtIsEqualEndsAt() throws Exception {
         String DESTINATION = "LOCALTEST, TS";
         String OWNER_EMAIL = "owner@gmail.com.br";
         String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
