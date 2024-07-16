@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class ParticipantControllerGetAll {
+class ParticipantControllerGetAll {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -32,7 +32,7 @@ public class ParticipantControllerGetAll {
     private ObjectMapper objectMapper;
 
     @Test
-    public void shouldToBeAbleToGetAllParticipants() throws Exception {
+    void shouldToBeAbleToGetAllParticipants() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -80,7 +80,7 @@ public class ParticipantControllerGetAll {
     }
 
     @Test
-    public void shouldToBeNotAbleToGetAllParticipantsWhenTripIdIsNotExists() throws Exception {
+    void shouldToBeNotAbleToGetAllParticipantsWhenTripIdIsNotExists() throws Exception {
         ResponseEntity<String> responseGet = restTemplate.getForEntity(
             "/participants/?tripId=" + UUID.randomUUID(),
             String.class
