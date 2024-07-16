@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class ParticipantControllerGetAll {
+class ParticipantControllerGetAllTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
