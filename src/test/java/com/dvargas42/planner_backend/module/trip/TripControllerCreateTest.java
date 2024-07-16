@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class TripControllerCreateTest {
+class TripControllerCreateTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -31,7 +31,7 @@ public class TripControllerCreateTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void shouldToBeAbleToCreateTrip() throws Exception {
+    void shouldToBeAbleToCreateTrip() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -60,7 +60,7 @@ public class TripControllerCreateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereStartAtIsInPast() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereStartAtIsInPast() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -87,7 +87,7 @@ public class TripControllerCreateTest {
 
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereStartAtEqualNow() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereStartAtEqualNow() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -113,7 +113,7 @@ public class TripControllerCreateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereEndsAtLessThanStartsAt() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereEndsAtLessThanStartsAt() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -139,7 +139,7 @@ public class TripControllerCreateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereOwnerNullorBlank() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereOwnerNullorBlank() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -165,7 +165,7 @@ public class TripControllerCreateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereOwnerNameisOneWord() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereOwnerNameisOneWord() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -191,7 +191,7 @@ public class TripControllerCreateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereOwnerNameHaveEspecialChars() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereOwnerNameHaveEspecialChars() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -217,7 +217,7 @@ public class TripControllerCreateTest {
     }
     
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereOwnerEmailNotValid() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereOwnerEmailNotValid() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
@@ -243,7 +243,7 @@ public class TripControllerCreateTest {
     }
 
     @Test
-    public void shouldToBeNotAbleToCreateTripWhereDestinationHaveSpecialChars() throws Exception {
+    void shouldToBeNotAbleToCreateTripWhereDestinationHaveSpecialChars() throws Exception {
         List<String> emailList = new ArrayList<>();
         emailList.add("participant01@gmail.com");
         emailList.add("participant02@gmail.com");
