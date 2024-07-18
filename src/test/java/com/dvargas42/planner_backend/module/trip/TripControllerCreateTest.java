@@ -74,9 +74,9 @@ class TripControllerCreateTest {
 
     private static Stream<Arguments> provideDateInterval() {
         return Stream.of(
-            Arguments.of(LocalDateTime.now().plusDays(1), LocalDateTime.now()),
-            Arguments.of(LocalDateTime.now(), LocalDateTime.now().plusDays(1)),
-            Arguments.of(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
+            Arguments.of(LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(1)),
+            Arguments.of(LocalDateTime.now(), LocalDateTime.now().plusDays(2)),
+            Arguments.of(LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(2))
         );
     }
 
