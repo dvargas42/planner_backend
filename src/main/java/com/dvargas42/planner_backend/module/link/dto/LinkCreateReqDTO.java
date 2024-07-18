@@ -20,6 +20,7 @@ public record LinkCreateReqDTO(
     @Length(max = 255, message = "must not have more than 255 characters")
     String title,
 
+    @NotBlank
     @URL(message = "must have a valid url")
     @Length(max = 255, message = "must not have more than 255 characters")
     String url
