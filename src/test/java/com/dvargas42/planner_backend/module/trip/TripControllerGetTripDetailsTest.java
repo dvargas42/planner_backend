@@ -31,27 +31,31 @@ class TripControllerGetTripDetailsTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final String participantEmail01 = "participant01@email.com";
+    private final String participantEmail02 = "participant02@email.com";
+    private final String participantEmail03 = "participant03@email.com";
+    private final String destination = "localTest, LT";
+    private final String ownerName = "firstName lastName";
+    private final String ownerEmail = "owner@email.com";
+
+    private final String startsAt = TestUtils.convertDateTime(LocalDateTime.now().plusDays(1));
+    private final String endsAt = TestUtils.convertDateTime(LocalDateTime.now().plusDays(2));
+
+
     @Test
     void shouldToBeAbleToGetAllTripDetails() throws Exception {
-        String DESTINATION = "LOCALTEST, TS";
-        String OWNER_EMAIL = "owner@gmail.com.br";
-        String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
-
-        List<String> EMAIL_LIST = new ArrayList<>();
-        EMAIL_LIST.add("participant01@gmail.com");
-        EMAIL_LIST.add("participant02@gmail.com");
-        EMAIL_LIST.add("participant03@gmail.com");
-
-        String STARTS_AT = TestUtils.convertDateTime(LocalDateTime.now().plusDays(1));
-        String ENDS_AT = TestUtils.convertDateTime(LocalDateTime.now().plusDays(2));
+        List<String> emailList = new ArrayList<>();
+        emailList.add(participantEmail01);
+        emailList.add(participantEmail02);
+        emailList.add(participantEmail03);
 
         TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            DESTINATION,
-            STARTS_AT,
-            ENDS_AT,
-            EMAIL_LIST,
-            OWNER_EMAIL,
-            OWNER_NAME
+            destination,
+            startsAt,
+            endsAt,
+            emailList,
+            ownerEmail,
+            ownerName
         );
 
         ResponseEntity<String> responsePost = restTemplate.postForEntity(
@@ -73,35 +77,28 @@ class TripControllerGetTripDetailsTest {
         assertEquals(7, TestUtils.getDeclaratedFields(TripGetDetailsRespDTO.class));
 
         assertThat(tripResponseGet.id()).isInstanceOf(UUID.class);
-        assertEquals(DESTINATION, tripResponseGet.destination());
-        assertEquals(STARTS_AT.substring(0, 20), tripResponseGet.starts_at().toString().substring(0, 20));
-        assertEquals(ENDS_AT.substring(0, 20), tripResponseGet.ends_at().toString().substring(0, 20));
+        assertEquals(destination, tripResponseGet.destination());
+        assertEquals(startsAt.substring(0, 20), tripResponseGet.starts_at().toString().substring(0, 20));
+        assertEquals(endsAt.substring(0, 20), tripResponseGet.ends_at().toString().substring(0, 20));
         assertEquals(false, tripResponseGet.is_confirmed());
-        assertEquals(OWNER_NAME, tripResponseGet.owner_name());
-        assertEquals(OWNER_EMAIL, tripResponseGet.owner_email());
+        assertEquals(ownerName, tripResponseGet.owner_name());
+        assertEquals(ownerEmail, tripResponseGet.owner_email());
     }
 
     @Test
     void shouldToBeNotAbleGetAllTripDetailsWhenIdIsIncorrect() throws Exception {
-        String DESTINATION = "LOCALTEST, TS";
-        String OWNER_EMAIL = "owner@gmail.com.br";
-        String OWNER_NAME = "OWNERFIRSTNAME OWNERLASTNAME";
-
-        List<String> EMAIL_LIST = new ArrayList<>();
-        EMAIL_LIST.add("participant01@gmail.com");
-        EMAIL_LIST.add("participant02@gmail.com");
-        EMAIL_LIST.add("participant03@gmail.com");
-
-        String STARTS_AT = TestUtils.convertDateTime (LocalDateTime.now().plusDays(1));
-        String ENDS_AT = TestUtils.convertDateTime(LocalDateTime.now().plusDays(2));
+        List<String> emailList = new ArrayList<>();
+        emailList.add(participantEmail01);
+        emailList.add(participantEmail02);
+        emailList.add(participantEmail03);
 
         TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            DESTINATION,
-            STARTS_AT,
-            ENDS_AT,
-            EMAIL_LIST,
-            OWNER_EMAIL,
-            OWNER_NAME
+            destination,
+            startsAt,
+            endsAt,
+            emailList,
+            ownerEmail,
+            ownerName
         );
 
         ResponseEntity<String> responsePost = restTemplate.postForEntity(
