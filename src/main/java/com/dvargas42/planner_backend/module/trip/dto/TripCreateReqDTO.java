@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Pattern;
 public record TripCreateReqDTO(
 
         @NotBlank
-        @Pattern(regexp = "^$|.*\\s.*", message = "must not have one word")
         @Pattern(regexp = "^([A-Za-zÀ-ÖØ-öø-ÿ0-9\\s,-]*)$", message = "must not have special characters")
         @Length(max = 255, message = "must not have more than 255 characters")
         String destination,
