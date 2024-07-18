@@ -29,6 +29,9 @@ public class TripService {
     @Autowired
     private ParticipantRepository participantRepository;
 
+    private final String startAt = "starts_at";
+    private final String endsAt = "ends_at";
+
     public TripCreateRespDTO createTrip(TripCreateReqDTO payload) {
         Trip trip = new Trip(payload);
         
@@ -77,19 +80,19 @@ public class TripService {
     private void dateValidation(Trip trip) {
         if (!trip.isStartsAtAfterNow()) {
             throw new TripStartsAtInPastException(
-                "starts_at", trip.getStartsAt().toString());
+                startAt, trip.getStartsAt().toString());
         }
 
         if (trip.isStartsAtEqualsEndsAt()) {
             throw new TripStartsAtEqualEndsAtException(
-                "starts_at", trip.getStartsAt().toString(), 
-                "ends_at", trip.getEndsAt().toString());
+                startAt, trip.getStartsAt().toString(), 
+                endsAt, trip.getEndsAt().toString());
         }
 
         if (!trip.isEndsAtMoreThanStartsAt()) {
             throw new TripEndsAtIsNotMoreThanStartsAtException(
-                "starts_at", trip.getStartsAt().toString(), 
-                "ends_at", trip.getEndsAt().toString());
+                startAt, trip.getStartsAt().toString(), 
+                endsAt, trip.getEndsAt().toString());
         }
     }
 }
