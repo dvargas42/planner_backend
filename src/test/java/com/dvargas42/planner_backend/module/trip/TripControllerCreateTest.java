@@ -7,8 +7,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -30,23 +35,30 @@ class TripControllerCreateTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final String participantEmail01 = "participant01@email.com";
+    private final String participantEmail02 = "participant02@email.com";
+    private final String participantEmail03 = "participant03@email.com";
+    private final String destination = "localTest, LT";
+    private final String ownerName = "firstName lastName";
+    private final String ownerEmail = "owner@email.com";
+
     @Test
     void shouldToBeAbleToCreateTrip() throws Exception {
         List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
+        emailList.add(participantEmail01);
+        emailList.add(participantEmail02);
+        emailList.add(participantEmail03);
 
         LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
         LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
 
         TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
+            destination,
             TestUtils.convertDateTime(nowPlusOne),
             TestUtils.convertDateTime(nowPlusTwo),
             emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
+            ownerEmail,
+            ownerName);
 
          ResponseEntity<String> response = restTemplate.postForEntity(
                 "/trips/", 
@@ -59,23 +71,33 @@ class TripControllerCreateTest {
         assertThat(tripResponse.tripId()).isInstanceOf(UUID.class);
     }
 
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereStartAtIsInPast() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
 
-        LocalDateTime nowPlusOne = LocalDateTime.now().minusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
+    private static Stream<Arguments> provideDateInterval() {
+        return Stream.of(
+            Arguments.of(LocalDateTime.now().plusDays(1), LocalDateTime.now()),
+            Arguments.of(LocalDateTime.now(), LocalDateTime.now().plusDays(1)),
+            Arguments.of(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideDateInterval")
+    void shouldToBeNotAbleToCreateTripWhereStartsAtAndEndsAtAreInvalid(
+        LocalDateTime nowPlusOne,
+        LocalDateTime nowPlusTwo
+    ) {
+        List<String> emailList = new ArrayList<>();
+        emailList.add(participantEmail01);
+        emailList.add(participantEmail02);
+        emailList.add(participantEmail03);
 
         TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
+            destination,
             TestUtils.convertDateTime(nowPlusOne),
             TestUtils.convertDateTime(nowPlusTwo),
             emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
+            ownerEmail,
+            ownerName);
 
          ResponseEntity<String> response = restTemplate.postForEntity(
                 "/trips/", 
@@ -85,180 +107,42 @@ class TripControllerCreateTest {
         assertEquals(400, response.getStatusCode().value());
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "\"Loc@l Test LT\"  , FisrtName LastName , owner@email.com",
+        "\" \"              , FisrtName LastName , owner@email.com",
+        "\"\"               , FisrtName LastName , owner@email.com",
+        "                   , FisrtName LastName , owner@email.com",
+        
+        "\"Local Test LT\"  , FirstName_LastName , owner@email.com",
+        "\"Local Test LT\"  , FirstName L@stName , owner@email.com",
+        "\"Local Test LT\"  , \" \"              , owner@email.com",
+        "\"Local Test LT\"  , \"\"               , owner@email.com",
+        "\"Local Test LT\"  ,                    , owner@email.com",
 
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereStartAtEqualNow() throws Exception {
+        "\"Local Test LT\", FirstName LastName  , owner@@email.com",
+        "\"Local Test LT\", FirstName LastName  , owneremail.com",
+        "\"Local Test LT\", FirstName LastName  , \" \"",
+        "\"Local Test LT\", FirstName LastName  , \"\"",
+        "\"Local Test LT\", FirstName LastName  ,",
+    })
+    void shouldToBeNotAbleToCreateTripWhereOwnerNameOwnerEmailAndDestinationAreInvalid(
+            String destination, String ownerName, String ownerEmail) {
         List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now();
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(1);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
-
-         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        assertEquals(400, response.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereEndsAtLessThanStartsAt() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now();
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
-
-         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        assertEquals(400, response.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereOwnerNullorBlank() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
+        emailList.add(participantEmail01);
+        emailList.add(participantEmail02);
+        emailList.add(participantEmail03);
 
         LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
         LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
 
         TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
+            destination,
             TestUtils.convertDateTime(nowPlusOne),
             TestUtils.convertDateTime(nowPlusTwo),
             emailList,
-            "owner@gmail.com.br",
-            null);
-
-         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        assertEquals(400, response.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereOwnerNameisOneWord() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME");
-
-         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        assertEquals(400, response.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereOwnerNameHaveEspecialChars() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERFIRSTNAME OWNERLASTNAME@");
-
-         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        assertEquals(400, response.getStatusCode().value());
-    }
-    
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereOwnerEmailNotValid() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owneremail",
-            "OWNERFIRSTNAME OWNERLASTNAME");
-
-         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        assertEquals(400, response.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToCreateTripWhereDestinationHaveSpecialChars() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant01@gmail.com");
-        emailList.add("participant02@gmail.com");
-        emailList.add("participant03@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST_, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@email.com",
-            "OWNERFIRSTNAME OWNERLASTNAME");
+            ownerEmail,
+            ownerName);
 
          ResponseEntity<String> response = restTemplate.postForEntity(
                 "/trips/", 
