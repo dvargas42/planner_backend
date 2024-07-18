@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -107,7 +109,7 @@ class ParticipantControllerConfirmTest {
     }
 
     @Test
-    void shouldToBeNotAbleToConfirmParticipantWhenIdIsInvalid() throws Exception {
+    void shouldToBeNotAbleToConfirmParticipantWhenIdIsInvalid() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -131,8 +133,19 @@ class ParticipantControllerConfirmTest {
         assertEquals(400, responseConfirm.getStatusCode().value());
     }
 
-    @Test
-    void shouldToBeNotAbleToConfirmParticipantWhenNameIsOne() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "firstName LastName ,",
+        "firstName LastName , participantgmail.com",
+        "firstName L@stName , participant@gmail.com",
+        "firstNameLastName  , participant@gmail.com",
+        "                   , participant@gmail.com",
+    })
+    void shouldToBeNotAbleToConfirmParticipantWhenNameAndEmailAreInvalids(
+        String name, 
+        String email
+    ) throws Exception {
+
         List<String> emailList = new ArrayList<>();
         emailList.add("participant@gmail.com");
 
@@ -172,8 +185,8 @@ class ParticipantControllerConfirmTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ParticipantConfirmReqDTO participantConfirmReqDTO = new ParticipantConfirmReqDTO(
-            "PARTICIPANTNAME",
-            "participant@gmail.com"
+            name,
+            email
         );
 
         HttpEntity<ParticipantConfirmReqDTO> requestParticipantConfirm = new HttpEntity<>(
@@ -190,244 +203,4 @@ class ParticipantControllerConfirmTest {
         
         assertEquals(400, responseConfirm.getStatusCode().value());
     }
-
-    @Test
-    void shouldToBeNotAbleToConfirmParticipantWhenNameIsInvalid() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
-
-        ResponseEntity<String> responseCreate = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        TripCreateRespDTO tripResponse = objectMapper.readValue(
-            responseCreate.getBody(),
-            TripCreateRespDTO.class
-        );
-
-        ResponseEntity<String> responseList = restTemplate.getForEntity(
-            "/participants/?tripId=" + tripResponse.tripId().toString(),
-            String.class
-        );
-        List<ParticipantGetAllRespDTO> participantList = objectMapper.readValue(
-            responseList.getBody(),
-            new TypeReference<List<ParticipantGetAllRespDTO>>() {}
-        );
-        ParticipantGetAllRespDTO participant = participantList.get(0);
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ParticipantConfirmReqDTO participantConfirmReqDTO = new ParticipantConfirmReqDTO(
-            "PARTICIPANT N@ME",
-            "participant@gmail.com"
-        );
-
-        HttpEntity<ParticipantConfirmReqDTO> requestParticipantConfirm = new HttpEntity<>(
-            participantConfirmReqDTO,
-            headers
-        );
-
-        ResponseEntity<String> responseConfirm = restTemplate.exchange(
-            "/participants/" + participant.id().toString(),
-            HttpMethod.PATCH,
-            requestParticipantConfirm,
-            String.class
-        );
-        
-        assertEquals(400, responseConfirm.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToConfirmParticipantWhenEmailIsInvalid() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
-
-        ResponseEntity<String> responseCreate = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        TripCreateRespDTO tripResponse = objectMapper.readValue(
-            responseCreate.getBody(),
-            TripCreateRespDTO.class
-        );
-
-        ResponseEntity<String> responseList = restTemplate.getForEntity(
-            "/participants/?tripId=" + tripResponse.tripId().toString(),
-            String.class
-        );
-        List<ParticipantGetAllRespDTO> participantList = objectMapper.readValue(
-            responseList.getBody(),
-            new TypeReference<List<ParticipantGetAllRespDTO>>() {}
-        );
-        ParticipantGetAllRespDTO participant = participantList.get(0);
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ParticipantConfirmReqDTO participantConfirmReqDTO = new ParticipantConfirmReqDTO(
-            "PARTICIPANT NAME",
-            "participantgmail.com"
-        );
-
-        HttpEntity<ParticipantConfirmReqDTO> requestParticipantConfirm = new HttpEntity<>(
-            participantConfirmReqDTO,
-            headers
-        );
-
-        ResponseEntity<String> responseConfirm = restTemplate.exchange(
-            "/participants/" + participant.id().toString(),
-            HttpMethod.PATCH,
-            requestParticipantConfirm,
-            String.class
-        );
-        
-        assertEquals(400, responseConfirm.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToConfirmParticipantWhenNameIsBlank() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
-
-        ResponseEntity<String> responseCreate = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        TripCreateRespDTO tripResponse = objectMapper.readValue(
-            responseCreate.getBody(),
-            TripCreateRespDTO.class
-        );
-
-        ResponseEntity<String> responseList = restTemplate.getForEntity(
-            "/participants/?tripId=" + tripResponse.tripId().toString(),
-            String.class
-        );
-        List<ParticipantGetAllRespDTO> participantList = objectMapper.readValue(
-            responseList.getBody(),
-            new TypeReference<List<ParticipantGetAllRespDTO>>() {}
-        );
-        ParticipantGetAllRespDTO participant = participantList.get(0);
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ParticipantConfirmReqDTO participantConfirmReqDTO = new ParticipantConfirmReqDTO(
-            "",
-            "participantgmail.com"
-        );
-
-        HttpEntity<ParticipantConfirmReqDTO> requestParticipantConfirm = new HttpEntity<>(
-            participantConfirmReqDTO,
-            headers
-        );
-
-        ResponseEntity<String> responseConfirm = restTemplate.exchange(
-            "/participants/" + participant.id().toString(),
-            HttpMethod.PATCH,
-            requestParticipantConfirm,
-            String.class
-        );
-        
-        assertEquals(400, responseConfirm.getStatusCode().value());
-    }
-
-    @Test
-    void shouldToBeNotAbleToConfirmParticipantWhenEmailIsBlank() throws Exception {
-        List<String> emailList = new ArrayList<>();
-        emailList.add("participant@gmail.com");
-
-        LocalDateTime nowPlusOne = LocalDateTime.now().plusDays(1);
-        LocalDateTime nowPlusTwo = LocalDateTime.now().plusDays(2);
-
-        TripCreateReqDTO tripRequest = new TripCreateReqDTO(
-            "LOCALTEST, TS",
-            TestUtils.convertDateTime(nowPlusOne),
-            TestUtils.convertDateTime(nowPlusTwo),
-            emailList,
-            "owner@gmail.com.br",
-            "OWNERNAME OWNERLASTNAME");
-
-        ResponseEntity<String> responseCreate = restTemplate.postForEntity(
-                "/trips/", 
-                tripRequest, 
-                String.class
-        );
-        TripCreateRespDTO tripResponse = objectMapper.readValue(
-            responseCreate.getBody(),
-            TripCreateRespDTO.class
-        );
-
-        ResponseEntity<String> responseList = restTemplate.getForEntity(
-            "/participants/?tripId=" + tripResponse.tripId().toString(),
-            String.class
-        );
-        List<ParticipantGetAllRespDTO> participantList = objectMapper.readValue(
-            responseList.getBody(),
-            new TypeReference<List<ParticipantGetAllRespDTO>>() {}
-        );
-        ParticipantGetAllRespDTO participant = participantList.get(0);
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ParticipantConfirmReqDTO participantConfirmReqDTO = new ParticipantConfirmReqDTO(
-            "PARTICIPANT NAME",
-            ""
-        );
-
-        HttpEntity<ParticipantConfirmReqDTO> requestParticipantConfirm = new HttpEntity<>(
-            participantConfirmReqDTO,
-            headers
-        );
-
-        ResponseEntity<String> responseConfirm = restTemplate.exchange(
-            "/participants/" + participant.id().toString(),
-            HttpMethod.PATCH,
-            requestParticipantConfirm,
-            String.class
-        );
-        
-        assertEquals(400, responseConfirm.getStatusCode().value());
-    } 
 }
